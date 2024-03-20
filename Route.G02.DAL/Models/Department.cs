@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Route.G02.DAL.Models
 {
     // Model
-    internal class Department
+    public class Department
     {
         public int Id { get; set; } // PK
 
@@ -17,5 +17,7 @@ namespace Route.G02.DAL.Models
         public string Name { get; set; }
 
         public DateTime DateOfCreation { get; set; }
+
+
     }
 }
