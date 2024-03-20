@@ -18,6 +18,5 @@ namespace Route.G02.DAL.Models
 
         public DateTime DateOfCreation { get; set; }
 
-
     }
 }

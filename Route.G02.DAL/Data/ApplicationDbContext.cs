@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Route.G02.DAL.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext:DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :base(options) 
         { 
