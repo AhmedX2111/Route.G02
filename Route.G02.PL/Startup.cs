@@ -33,7 +33,7 @@ namespace Route.G02.PL
 
             services.AddDbContext<ApplicationDbContext>(Options =>
             {
-                Options.UseSqlServer("Server = .; Database = MVCApplicationG02; Trusted_Connection = True;");
+                Options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
         }
 
