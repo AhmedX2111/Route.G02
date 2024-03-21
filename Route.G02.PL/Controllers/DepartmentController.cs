@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Route.G02.BLL.Interfaces;
 using Route.G02.BLL.Repositories;
+using Route.G02.DAL.Models;
 
 namespace Route.G02.PL.Controllers
 {
@@ -23,6 +24,29 @@ namespace Route.G02.PL.Controllers
             var depaartments = _departmentRepo.GetAll();
 
             return View(depaartments);
+
+        }
+
+        // /Departmet/Create
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+
+        public IActionResult Create(Department department)
+        {
+            if(ModelState.IsValid) // Server Side Vl=alidation
+            {
+               var count = _departmentRepo.Add(department);
+                if(count > 0)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            return View(department);
         }
     }
 }

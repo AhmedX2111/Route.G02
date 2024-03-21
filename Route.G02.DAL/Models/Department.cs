@@ -12,8 +12,10 @@ namespace Route.G02.DAL.Models
     {
         public int Id { get; set; } // PK
 
+        [Required(ErrorMessage = "Code is required")]
         public string Code { get; set; }
 
+        [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
 
         [Display(Name = "Date Of Creation")]
