@@ -20,8 +20,9 @@ namespace Route.G02.PL.Controllers
         //  /Department/Index
         public IActionResult Index()
         {
-            //var depaartments = _departmentRepo
-            return View();
+            var depaartments = _departmentRepo.GetAll();
+
+            return View(depaartments);
         }
     }
 }
