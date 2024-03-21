@@ -51,6 +51,7 @@ namespace Route.G02.PL
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
