@@ -1,14 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Route.G02.BLL.Interfaces;
-using Route.G02.BLL.Repositories;
-using Route.G02.DAL.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,17 +23,7 @@ namespace Route.G02.PL
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews(); // Register Built-In services Required by MVC
-
-            //services.AddScoped<ApplicationDbContext>();
-            //services.AddScoped<DbContextOptions<ApplicationDbContext>>();
-
-            services.AddDbContext<ApplicationDbContext>(Options =>
-            {
-                Options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            });
-
-            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,7 +40,6 @@ namespace Route.G02.PL
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-
             app.UseStaticFiles();
 
             app.UseRouting();
