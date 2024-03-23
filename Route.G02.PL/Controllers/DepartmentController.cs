@@ -48,5 +48,23 @@ namespace Route.G02.PL.Controllers
             }
             return View(department);
         }
+
+        // /Department/Deatils/10
+        // /Department/Deatils/
+        [HttpGet]
+
+        public IActionResult Details(int? id)
+        {
+            if (!id.HasValue)
+                return BadRequest();  //  400
+
+            var department = _departmentRepo.Get(id.Value); 
+
+            if (department is null)
+                return BadRequest();  //  404
+
+            return View(department);
+
+        }
     }
 }
