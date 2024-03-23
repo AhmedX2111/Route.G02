@@ -13,7 +13,12 @@ namespace Route.G02.PL
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+           var hostbuilder = CreateHostBuilder(args).Build();
+
+            // Data Seeding 
+            // Apply Migartions
+
+            hostbuilder.Run(); // Application is Ready for Requests
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
