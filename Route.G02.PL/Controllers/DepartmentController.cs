@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
 using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Models;
+using Route.G02.PL.ViewModels;
 using System;
 
 namespace Route.G02.PL.Controllers
@@ -119,7 +120,38 @@ namespace Route.G02.PL.Controllers
 
                 return View(department);
             }
-            
+
+        }
+
+
+        // /Department/Delete/10
+        // /Department/Delete
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            return Details(id, "Delete");
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Department department)
+        {
+            try
+            {
+                _departmentRepo.Delete(department);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // 1. Log exception
+                // 2. Friendly Message
+
+                if (_env.IsDevelopment())
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                else
+                    ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Department");
+
+                return View(department);
+            }
         }
     }
 }
