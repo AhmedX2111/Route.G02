@@ -22,9 +22,9 @@ namespace Route.G02.DAL.Models
         PartTime = 2,
     }
 
-    public class Employee
+    public class Employee : ModelBase
     {
-        public int Id { get; set; }
+        
 
         [Required(ErrorMessage ="Name is Required")]
         [MaxLength(50, ErrorMessage ="Max Lenght of Name is 5o chars")]
