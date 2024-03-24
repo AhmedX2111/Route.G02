@@ -27,6 +27,7 @@ namespace Route.G02.PL.Controllers
         }
 
         //  /Department/Index
+        [HttpGet]
         public IActionResult Index()
         {
             var depaartments = _departmentRepo.GetAll();
