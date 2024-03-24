@@ -36,7 +36,10 @@ namespace Route.G02.DAL.Models
 
         public int? Age { get; set; }
 
-        [RegularExpression(@"^[0-9]{1,3}-[a-zA-Z]{5,10}-[a-zA-Z{4,10}-[a-zA-Z]{5,10}$", ErrorMessage ="Address must be like 123-city-Country")]
+        [RegularExpression(@"^[0-9]{1,5} [a-zA-Z0-9\s'-]{1,50}, [a-zA-Z\s'-]{1,50}, [a-zA-Z]{2,3}$",
+                 ErrorMessage = "Address must be in the format: StreetNumber StreetName, City, CountryCode")]
+
+
 
         public string Address { get; set; }
 
