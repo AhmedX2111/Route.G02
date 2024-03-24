@@ -41,7 +41,6 @@
         </div>
         <span asp-validation-for="Gender" class="text-danger"></span>
     </div>
-
     <div class="form-group">
         <label class="col-form-label" asp-for="Salary"></label>
         <input asp-for="Salary" class="form-control" />
@@ -53,7 +52,6 @@
             <label class="form-check-label" asp-for="IsActive">Is Active</label>
         </div>
     </div>
-
     <div class="form-group">
         <label class="col-form-label" asp-for="HiringDate"></label>
         <input asp-for="HiringDate" class="form-control" />
@@ -63,4 +61,10 @@
     <input type="submit" value="Create" class="btn btn-primary" />
     <a asp-action="Index" class="btn btn-light">Back To List</a>
 </form>
+
+@section ValidationScriptsSection{
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+}
+
 

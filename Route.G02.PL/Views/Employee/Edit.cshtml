@@ -5,7 +5,10 @@
 
 <h1>Edit Employee</h1>
 
-<form asp-action="Edit" asp-controller="Employee">
+<br />
+<br />
+
+<form asp-action="Edit" >
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -52,4 +55,9 @@
     <a asp-action="Index" class="btn btn-info">Cancel</a>
 
 </form>
+
+@section ValidationScriptsSection {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+}
 
