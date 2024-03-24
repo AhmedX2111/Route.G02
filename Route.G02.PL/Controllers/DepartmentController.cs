@@ -1,7 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
 using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Models;
+using Route.G02.PL.ViewModels;
+using System;
 
 namespace Route.G02.PL.Controllers
 {
@@ -12,13 +18,16 @@ namespace Route.G02.PL.Controllers
     public class DepartmentController : Controller
     {
         private readonly IDepartmentRepository _departmentRepo; // NULL
+        private readonly IWebHostEnvironment _env;
 
-        public DepartmentController(IDepartmentRepository departmentsRepo) // Ask CLR for Creating object from class Implmenting IdepartmentRepository
+        public DepartmentController(IDepartmentRepository departmentsRepo, IWebHostEnvironment env) // Ask CLR for Creating object from class Implmenting IdepartmentRepository
         {
             _departmentRepo = departmentsRepo;
+            _env = env;
         }
 
         //  /Department/Index
+        [HttpGet]
         public IActionResult Index()
         {
             var depaartments = _departmentRepo.GetAll();
@@ -47,6 +56,103 @@ namespace Route.G02.PL.Controllers
                 }
             }
             return View(department);
+        }
+
+        // /Department/Deatils/10
+        // /Department/Deatils/
+        [HttpGet]
+
+        public IActionResult Details(int? id, string viewName = "Details")
+        {
+            if (!id.HasValue)
+                return BadRequest();  //  400
+
+            var department = _departmentRepo.Get(id.Value); 
+
+            if (department is null)
+                return NotFound();  //  404
+
+            return View(viewName, department);
+
+        }
+
+        // /Department/Edit/10
+        // /Department/Edit/
+        [HttpGet]
+        public IActionResult Edit(int? id)
+        {
+            //if (!id.HasValue)
+            //    return BadRequest();  //  400
+
+            //var department = _departmentRepo.Get(id.Value);
+
+            //if (department is null)
+            //    return NotFound();  //  404
+
+            //return View(department);
+
+            return Details(id, "Edit");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit([FromRoute]int id, Department department)
+        {
+            if(id != department.Id)
+                return BadRequest();
+
+            if (ModelState.IsValid)
+                 return View(department);
+
+            try
+            {
+                _departmentRepo.Update(department);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // 1. Log Exception
+                // 2. Friendly Message
+
+                if(_env.IsDevelopment())
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                else
+                    ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Department");
+
+                return View(department);
+            }
+
+        }
+
+
+        // /Department/Delete/10
+        // /Department/Delete
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            return Details(id, "Delete");
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Department department)
+        {
+            try
+            {
+                _departmentRepo.Delete(department);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // 1. Log exception
+                // 2. Friendly Message
+
+                if (_env.IsDevelopment())
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                else
+                    ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Department");
+
+                return View(department);
+            }
         }
     }
 }
