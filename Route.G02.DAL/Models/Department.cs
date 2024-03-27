@@ -20,9 +20,9 @@ namespace Route.G02.DAL.Models
         [Display(Name = "Date Of Creation")]
         public DateTime DateOfCreation { get; set; }
 
-
         //[InverseProperty(nameof(Employee.Department))]
         // Navigational property => [Many]
         public ICollection<Employee> Employees { get; set; } = new HashSet<Employee>();
+
     }
 }

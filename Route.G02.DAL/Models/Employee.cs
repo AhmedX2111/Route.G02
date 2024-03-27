@@ -77,10 +77,10 @@ namespace Route.G02.DAL.Models
         public int? DepartmentId { get; set; } // Foregin key column
 
 
+
         //[InverseProperty(nameof(Models.Department.Employees))]
         // Navigational property = [one]
         public Department Department { get; set; }
-
 
     }
 }

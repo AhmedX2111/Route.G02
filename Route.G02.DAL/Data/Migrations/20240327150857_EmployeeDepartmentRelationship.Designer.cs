@@ -10,8 +10,8 @@ using Route.G02.DAL.Data;
 namespace Route.G02.DAL.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240327144753_EmployeeDepartmentRealationship")]
-    partial class EmployeeDepartmentRealationship
+    [Migration("20240327150857_EmployeeDepartmentRelationship")]
+    partial class EmployeeDepartmentRelationship
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
