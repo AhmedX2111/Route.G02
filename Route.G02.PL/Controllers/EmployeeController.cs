@@ -22,18 +22,15 @@ namespace Route.G02.PL.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            TempData.Keep();
             // Binding Through views Dictionary : Transfer Data from Action to View[one way]
 
             // 1.ViewData is a Dictionary Type Property (Introduced in ASP.Net Framework 3.5)
             //          => it helps us to transfer the data from controller[Action] to View
-
-            // 1. ViewData
             ViewData["Message"] = "Hello ViewData";
 
             // 1.ViewBag is a Dictionary Type Property (Introduced in ASP.Net Framework 4.0 based on dynamic feature)
             //          => it helps us to transfer the data from controller[Action] to View
-
-            // 2. ViewBag
             ViewBag.Message = "Hello ViewBag";
 
 
@@ -57,10 +54,16 @@ namespace Route.G02.PL.Controllers
             if (ModelState.IsValid) // Server Side Vl=alidation
             {
                 var count = _employeeRepo.Add(employee);
+
+                // 3. TempData is a Dictionary Type Property (introduce in Asp.Net Framework 3.5)
+                //         => is used to pass data between two consecutive requests
+
+
                 if (count > 0)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                    TempData["Message"] = "Department is Created Successfully";
+                else
+                    TempData["Message"] = "An Error Has Occured, Department not created";
+                return RedirectToAction(nameof(Index));
             }
             return View(employee);
         }

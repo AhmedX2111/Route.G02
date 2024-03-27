@@ -8,11 +8,20 @@
     string ViewBagMessage = ViewBag.Message; // Can not Enforce Type Safety -> Not Require Type Conversion
 }
 
+@if (!string.IsNullOrEmpty(TempData["Message"] as string))
+{
+    <div class="alert alert-primary">
+        @TempData["Message"]
+    </div>
+    
+}
+
+
 @* <div class="alert alert-warning">
     @ViewData["Message"]
-</div> *@
+</div> 
 
-@* <div class="alert alert-success">
+<div class="alert alert-success">
     @ViewBag.Message
 </div> *@
 
