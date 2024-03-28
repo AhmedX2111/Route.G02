@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
 using Route.G02.DAL.Models;
 using System;
+using System.Linq;
 
 namespace Route.G02.PL.Controllers
 {
@@ -21,24 +22,27 @@ namespace Route.G02.PL.Controllers
         }
 
         //  /Employee/Index
-        [HttpGet]
-        public IActionResult Index()
+        //[HttpGet]
+        public IActionResult Index(string searchInp)
         {
-            TempData.Keep();
-            // Binding Through views Dictionary : Transfer Data from Action to View[one way]
+            ///TempData.Keep();
+            ///Binding Through views Dictionary : Transfer Data from Action to View[one way]
+            /// 1.ViewData is a Dictionary Type Property(Introduced in ASP.Net Framework 3.5)
+            ///          => it helps us to transfer the data from controller[Action] to View
+            ///ViewData["Message"] = "Hello ViewData";
+            ///1.ViewBag is a Dictionary Type Property(Introduced in ASP.Net Framework 4.0 based on dynamic feature)
+            ///          => it helps us to transfer the data from controller[Action] to View
+            ///ViewBag.Message = "Hello ViewBag";
 
-            // 1.ViewData is a Dictionary Type Property (Introduced in ASP.Net Framework 3.5)
-            //          => it helps us to transfer the data from controller[Action] to View
-            ViewData["Message"] = "Hello ViewData";
+            var employees = Enumerable.Empty<Employee>();
 
-            // 1.ViewBag is a Dictionary Type Property (Introduced in ASP.Net Framework 4.0 based on dynamic feature)
-            //          => it helps us to transfer the data from controller[Action] to View
-            ViewBag.Message = "Hello ViewBag";
+            if (string.IsNullOrEmpty(searchInp))
+                 employees = _employeeRepo.GetAll();
+            else
+               employees = _employeeRepo.SearchByName(searchInp.ToLower());  
 
-
-            var employees = _employeeRepo.GetAll();
-
-            return View(employees);
+              return View(employees);
+            
 
         }
 

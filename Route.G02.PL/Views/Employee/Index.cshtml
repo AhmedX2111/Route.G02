@@ -3,27 +3,10 @@
 @{
     ViewData["Title"] = "Index";
 
-    string ViewDataMessage = ViewData["Message"] as string; // Enforce Type Safety -> Requires Type Conversion => [strongly Typed Language]
 
-    string ViewBagMessage = ViewBag.Message; // Can not Enforce Type Safety -> Not Require Type Conversion
-}
-
-@if (!string.IsNullOrEmpty(TempData["Message"] as string))
-{
-    <div class="alert alert-primary">
-        @TempData["Message"]
-    </div>
-    
 }
 
 
-@* <div class="alert alert-warning">
-    @ViewData["Message"]
-</div> 
-
-<div class="alert alert-success">
-    @ViewBag.Message
-</div> *@
 
 
 <h1>All Employees</h1>
@@ -33,6 +16,23 @@
 <a asp-asp-controller="Employee" asp-action="Create" class="btn btn-primary">Create New Employee</a>
 
 <br/>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form asp-action="Index" class="row g-3">
+                <div class="col-9">
+                    <input type="text" class="form-control" name="searchInp" id="searchInp" placeholder="Search By Name" />
+                </div>
+                <div class="col-3">
+                    <button type="submit" class="btn btn-success w-100">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 
 @if(Model.Count()> 0)
 {
@@ -73,8 +73,10 @@
     </table>
 }
 else
-    {
-        <div class="mt-4 alert alert-warning">
-            <h3>Ther is No Employee :(</h3>
-        </div>
-    }
+{
+    <div class="mt-4 alert alert-warning">
+        <h3>Ther is No Employee :(</h3>
+    </div>
+}
+
+
