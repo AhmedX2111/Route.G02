@@ -10,6 +10,7 @@ using Route.G02.BLL.Interfaces;
 using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Data;
 using Route.G02.PL.Extensions;
+using Route.G02.PL.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +44,8 @@ namespace Route.G02.PL
             //ApplicationServicesExtensions.ApplicationServices(services); // Static Method
 
             services.ApplicationServices(); // Extension Method
+
+            services.AddAutoMapper(M => M.AddProfile(new MappingProfiles()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
