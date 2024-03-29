@@ -146,7 +146,7 @@ namespace Route.G02.PL.Controllers
             if (id != employeeVM.Id)
                 return BadRequest();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return View(employeeVM);
 
             try

@@ -111,10 +111,10 @@ namespace Route.G02.PL.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit([FromRoute] int id, DepartmentViewModel departmentVM)
         {
-            if(id != departmentVM.Id)
+            if(id!= departmentVM.Id)
                 return BadRequest();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
                  return View(departmentVM);
 
             try
