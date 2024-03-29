@@ -12,7 +12,7 @@ namespace Route.G02.BLL.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : ModelBase
     {
-        private protected readonly ApplicationDbContext _dbContext; // NULL
+        private protected  readonly ApplicationDbContext _dbContext; // NULL
 
         public GenericRepository(ApplicationDbContext dbContext) // Ask CLR for creating object from "ApplicationDbContext"
         {
@@ -55,6 +55,11 @@ namespace Route.G02.BLL.Repositories
         }
 
         public IEnumerable<T> GetAll()
-             => _dbContext.Set<T>().AsNoTracking().ToList();
+        { 
+            if(typeof(T) == typeof(Employee))
+                return (IEnumerable<T>) _dbContext.Employees.Include(E => E.Department).AsNoTracking().ToList();
+            else
+             return _dbContext.Set<T>().AsNoTracking().ToList();
+        }
     }
 }

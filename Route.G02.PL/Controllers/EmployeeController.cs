@@ -1,53 +1,106 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
 using Route.G02.DAL.Models;
+using Route.G02.PL.ViewModels;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Route.G02.PL.Controllers
 {
     public class EmployeeController : Controller
     {
+        private readonly IMapper _mapper;
         private readonly IEmployeeRepository _employeeRepo; // NULL
+        //private readonly IDepartmentRepository _departmentRepo;
         private readonly IWebHostEnvironment _env;
 
-        public EmployeeController(IEmployeeRepository employeesRepo, IWebHostEnvironment env) // Ask CLR for Creating object from class Implmenting IEmployeeRepository
+        public EmployeeController(IMapper mapper, IEmployeeRepository employeesRepo/*, IDepartmentRepository  departmentRepo*/, IWebHostEnvironment env) // Ask CLR for Creating object from class Implmenting IEmployeeRepository
         {
+            _mapper = mapper;
             _employeeRepo = employeesRepo;
+            //_departmentRepo = departmentRepo;
             _env = env;
         }
 
         //  /Employee/Index
-        [HttpGet]
-        public IActionResult Index()
+        //[HttpGet]
+        public IActionResult Index(string searchInp)
         {
-            var employees = _employeeRepo.GetAll();
+            ///TempData.Keep();
+            ///Binding Through views Dictionary : Transfer Data from Action to View[one way]
+            /// 1.ViewData is a Dictionary Type Property(Introduced in ASP.Net Framework 3.5)
+            ///          => it helps us to transfer the data from controller[Action] to View
+            ///ViewData["Message"] = "Hello ViewData";
+            ///1.ViewBag is a Dictionary Type Property(Introduced in ASP.Net Framework 4.0 based on dynamic feature)
+            ///          => it helps us to transfer the data from controller[Action] to View
+            ///ViewBag.Message = "Hello ViewBag";
 
-            return View(employees);
+            var employees = Enumerable.Empty<Employee>();
+
+            if (string.IsNullOrEmpty(searchInp))
+                 employees = _employeeRepo.GetAll();
+            else
+               employees = _employeeRepo.SearchByName(searchInp.ToLower());
+
+            var mappedEmps = _mapper.Map<IEnumerable<Employee>, IEnumerable<EmployeeViewModel>>(employees);
+
+
+            return View(mappedEmps);
+            
 
         }
 
-        // /Departmet/Create
+        // /Employee/Create
         [HttpGet]
         public IActionResult Create()
         {
+            //ViewData["Departments"] = _departmentRepo.GetAll();
+            //ViewBag.Departments = _departmentRepo.GetAll();
             return View();
         }
 
         [HttpPost]
 
-        public IActionResult Create(Employee employee)
+        public IActionResult Create(EmployeeViewModel employeeVM)
         {
             if (ModelState.IsValid) // Server Side Vl=alidation
             {
-                var count = _employeeRepo.Add(employee);
+                // Manual Mapping
+                ///var mappedEmp = new Employee()
+                ///{
+                ///    Name = employeeVM.Name,
+                ///    Age = employeeVM.Age,
+                ///    Address = employeeVM.Address,
+                ///    Salary = employeeVM.Salary,
+                ///    Email = employeeVM.Email,
+                ///    PhoneNumber = employeeVM.PhoneNumber,
+                ///    IsActive = employeeVM.IsActive,
+                ///    HiringDate = employeeVM.HiringDate
+                ///};
+
+                //Employee mappedEmp = (Employee) employeeVM;
+
+
+                var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
+
+                var count = _employeeRepo.Add(mappedEmp);
+
+                // 3. TempData is a Dictionary Type Property (introduce in Asp.Net Framework 3.5)
+                //         => is used to pass data between two consecutive requests
+
+
                 if (count > 0)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                    TempData["Message"] = "Department is Created Successfully";
+                else
+                    TempData["Message"] = "An Error Has Occured, Department not created";
+                return RedirectToAction(nameof(Index));
             }
-            return View(employee);
+            return View(employeeVM);
         }
 
         // /Employee/Deatils/10
@@ -61,10 +114,12 @@ namespace Route.G02.PL.Controllers
 
             var employee = _employeeRepo.Get(id.Value);
 
+            var mappedEmp = _mapper.Map<Employee, EmployeeViewModel>(employee);
+
             if (employee is null)
                 return NotFound();  //  404
 
-            return View(viewName, employee);
+            return View(viewName, mappedEmp);
 
         }
 
@@ -73,6 +128,7 @@ namespace Route.G02.PL.Controllers
         //[HttpGet]
         public IActionResult Edit(int? id)
         {
+            //ViewBag.Departments = _departmentRepo.GetAll();
             return Details(id, "Edit");
 
             ///if (!id.HasValue)
@@ -85,17 +141,19 @@ namespace Route.G02.PL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, Employee employee)
+        public IActionResult Edit([FromRoute] int id, EmployeeViewModel employeeVM)
         {
-            if (id != employee.Id)
+            if (id != employeeVM.Id)
                 return BadRequest();
 
-            if (ModelState.IsValid)
-                return View(employee);
+            if (!ModelState.IsValid)
+                return View(employeeVM);
 
             try
             {
-                _employeeRepo.Update(employee);
+                var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
+
+                _employeeRepo.Update(mappedEmp);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -108,7 +166,7 @@ namespace Route.G02.PL.Controllers
                 else
                     ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Employee");
 
-                return View(employee);
+                return View(employeeVM);
             }
 
         }
@@ -123,11 +181,13 @@ namespace Route.G02.PL.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(Employee employee)
+        public IActionResult Delete(EmployeeViewModel employeeVM)
         {
             try
             {
-                _employeeRepo.Delete(employee);
+                var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
+
+                _employeeRepo.Delete(mappedEmp);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -140,7 +200,7 @@ namespace Route.G02.PL.Controllers
                 else
                     ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Employee");
 
-                return View(employee);
+                return View(employeeVM);
             }
         }
     }

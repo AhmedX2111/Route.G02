@@ -1,31 +1,29 @@
-﻿@model Department
+﻿@model DepartmentViewModel
 @{
     ViewData["Title"] = "Edit Department";
 }
 
-<h1>Edit Department</h1>
+<h1>Edit Department  @Model.Name Department</h1>
+
+<div asp-validation-summary="All">
+</div>
 
 <form asp-action="Edit" asp-controller="Department">
 
     <div asp-validation-summary="All" class="text-danger"></div>
 
-    <div class="form-group">
-        <label class="col-form-label" asp-for="Code"></label>
-        <input asp-for="Code" class="form-control" />
-        <span asp-validation-for="Code" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label class="col-form-label" asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label class="col-form-label" asp-for="DateOfCreation"></label>
-        <input asp-for="DateOfCreation" class="form-control" />
-    </div>
+    <partial name="PartialViews/CreateEditDepartmentPartial" />
 
     <input type="submit" value="Save" class="btn btn-primary" />
-    <a asp-action="Index" class="btn btn-info">Cancel</a>
+    <a asp-action="Index" class="btn btn-outline-info">Cancel</a>
 
 </form>
 
+@section ValidationScriptsSection
+{
+    <partial name="_ValidationScriptsPartial" />
+
+
+    @* <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script> *@
+}
