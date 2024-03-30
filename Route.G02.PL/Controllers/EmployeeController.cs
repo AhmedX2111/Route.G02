@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
+using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Models;
 using Route.G02.PL.ViewModels;
 using System;
@@ -14,17 +15,24 @@ namespace Route.G02.PL.Controllers
 {
     public class EmployeeController : Controller
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IEmployeeRepository _employeeRepo; // NULL
+        //private readonly IEmployeeRepository _employeeRepo; // NULL
         //private readonly IDepartmentRepository _departmentRepo;
-        private readonly IWebHostEnvironment _env;
+        private readonly IHostEnvironment _env;
 
-        public EmployeeController(IMapper mapper, IEmployeeRepository employeesRepo/*, IDepartmentRepository  departmentRepo*/, IWebHostEnvironment env) // Ask CLR for Creating object from class Implmenting IEmployeeRepository
+        public EmployeeController(
+            IUnitOfWork unitOfWork,
+            //IEmployeeRepository employeesRepo
+            //, IDepartmentRepository  departmentRepo,
+            IMapper mapper, 
+            IHostEnvironment env) // Ask CLR for Creating object from class Implmenting IEmployeeRepository
         {
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _employeeRepo = employeesRepo;
-            //_departmentRepo = departmentRepo;
             _env = env;
+            //_employeeRepo = employeesRepo;
+            //_departmentRepo = departmentRepo;
         }
 
         //  /Employee/Index
@@ -42,10 +50,12 @@ namespace Route.G02.PL.Controllers
 
             var employees = Enumerable.Empty<Employee>();
 
+            var employeeRepo = _unitOfWork.Repository<Employee>() as EmployeeRepository;
+
             if (string.IsNullOrEmpty(searchInp))
-                 employees = _employeeRepo.GetAll();
+                 employees = employeeRepo.GetAll();
             else
-               employees = _employeeRepo.SearchByName(searchInp.ToLower());
+               employees = employeeRepo.SearchByName(searchInp.ToLower());
 
             var mappedEmps = _mapper.Map<IEnumerable<Employee>, IEnumerable<EmployeeViewModel>>(employees);
 
@@ -88,11 +98,21 @@ namespace Route.G02.PL.Controllers
 
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
-                var count = _employeeRepo.Add(mappedEmp);
+                 _unitOfWork.Repository<Employee>().Add(mappedEmp);
 
-                // 3. TempData is a Dictionary Type Property (introduce in Asp.Net Framework 3.5)
-                //         => is used to pass data between two consecutive requests
+                /// 3. TempData is a Dictionary Type Property (introduce in Asp.Net Framework 3.5)
+                ///         => is used to pass data between two consecutive requests
 
+                // 2. Update Department
+                // _UnitOfWork.Repository<Department>().Update(department);
+
+
+                // 3. Delete project
+                // _UnitOfWork.Repository<project>().Remove(project);
+
+
+                //_dbContext.Savechanges();
+                var count = _unitOfWork.Complete();
 
                 if (count > 0)
                     TempData["Message"] = "Department is Created Successfully";
@@ -112,7 +132,7 @@ namespace Route.G02.PL.Controllers
             if (!id.HasValue)
                 return BadRequest();  //  400
 
-            var employee = _employeeRepo.Get(id.Value);
+            var employee = _unitOfWork.Repository<Employee>().Get(id.Value);
 
             var mappedEmp = _mapper.Map<Employee, EmployeeViewModel>(employee);
 
@@ -153,7 +173,8 @@ namespace Route.G02.PL.Controllers
             {
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
-                _employeeRepo.Update(mappedEmp);
+                _unitOfWork.Repository<Employee>().Update(mappedEmp);
+                _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -187,7 +208,8 @@ namespace Route.G02.PL.Controllers
             {
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
-                _employeeRepo.Delete(mappedEmp);
+                _unitOfWork.Repository<Employee>().Delete(mappedEmp);
+                _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

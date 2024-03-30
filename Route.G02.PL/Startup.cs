@@ -38,12 +38,14 @@ namespace Route.G02.PL
             services.AddDbContext<ApplicationDbContext>(Options =>
             {
                 Options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            }, ServiceLifetime.Scoped);
+            }/*, ServiceLifetime.Scoped*/);
 
 
             //ApplicationServicesExtensions.ApplicationServices(services); // Static Method
 
-            services.ApplicationServices(); // Extension Method
+            //services.ApplicationServices();// Extension Method
+
+            services.AddApplicationServices();
 
             services.AddAutoMapper(M => M.AddProfile(new MappingProfiles()));
         }
