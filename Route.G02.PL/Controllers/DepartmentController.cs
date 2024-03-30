@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Route.G02.BLL.Interfaces;
 using Route.G02.DAL.Models;
