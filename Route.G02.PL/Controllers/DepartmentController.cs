@@ -1,52 +1,42 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
-using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Models;
 using Route.G02.PL.ViewModels;
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 
 namespace Route.G02.PL.Controllers
 {
-    // Inhertiance : DepartmentController is a Controller 
-
-    // Composition : DepartmentController has a DepartmentRepository
-
     public class DepartmentController : Controller
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IDepartmentRepository _departmentRepo; // NULL
         private readonly IWebHostEnvironment _env;
 
-        public DepartmentController(IMapper mapper,IUnitOfWork unitOfWork, IWebHostEnvironment env) // Ask CLR for Creating object from class Implmenting IdepartmentRepository
+        public DepartmentController(IMapper mapper, IUnitOfWork unitOfWork, IWebHostEnvironment env)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _env = env;
         }
 
-        //  /Department/Index
         [HttpGet]
         public IActionResult Index(string searchInput)
         {
-            var depaartments = _unitOfWork.DepartmentRepository.GetAll();
+            // Retrieve departments from the repository
+            var departments = _unitOfWork.Repository<Department>().GetAll();
 
-            var mappedEmp = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentViewModel>>(depaartments);
+            // Map departments to DepartmentViewModels
+            var departmentViewModels = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentViewModel>>(departments);
 
-
-            return View(mappedEmp);
-            
-
+            // Pass the DepartmentViewModels to the view
+            return View(departmentViewModels);
         }
 
-        // /Departmet/Create
         [HttpGet]
         public IActionResult Create()
         {
@@ -54,98 +44,82 @@ namespace Route.G02.PL.Controllers
         }
 
         [HttpPost]
-
         public IActionResult Create(DepartmentViewModel departmentVM)
         {
-            if(ModelState.IsValid) // Server Side Vl=alidation
+            if (ModelState.IsValid)
             {
-                var mappedEmp = _mapper.Map<DepartmentViewModel, Department>(departmentVM);
+                // Map DepartmentViewModel to Department entity
+                var department = _mapper.Map<DepartmentViewModel, Department>(departmentVM);
 
-                _unitOfWork.DepartmentRepository.Add(mappedEmp);
-                var count = _unitOfWork.Complete();
+                // Add department to the repository
+                _unitOfWork.Repository<Department>().Add(department);
+                _unitOfWork.Complete();
 
-                if (count > 0)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
             return View(departmentVM);
         }
 
-        // /Department/Deatils/10
-        // /Department/Deatils/
         [HttpGet]
-
         public IActionResult Details(int? id, string viewName = "Details")
         {
             if (!id.HasValue)
-                return BadRequest();  //  400
+                return BadRequest();
 
-            var department = _unitOfWork.DepartmentRepository.Get(id.Value);
+            // Retrieve department from the repository
+            var department = _unitOfWork.Repository<Department>().Get(id.Value);
 
-            var mappedEmp = _mapper.Map<Department, DepartmentViewModel>(department);
+            if (department == null)
+                return NotFound();
 
-            if (department is null)
-                return NotFound();  //  404
+            // Map Department to DepartmentViewModel
+            var departmentVM = _mapper.Map<Department, DepartmentViewModel>(department);
 
-            return View(viewName, mappedEmp);
-
+            return View(viewName, departmentVM);
         }
 
-        // /Department/Edit/10
-        // /Department/Edit/
         [HttpGet]
         public IActionResult Edit(int? id)
         {
-            //if (!id.HasValue)
-            //    return BadRequest();  //  400
-
-            //var department = _departmentRepo.Get(id.Value);
-
-            //if (department is null)
-            //    return NotFound();  //  404
-
-            //return View(department);
+            if (!id.HasValue)
+                return BadRequest();
 
             return Details(id, "Edit");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, DepartmentViewModel departmentVM)
+        public IActionResult Edit(int id, DepartmentViewModel departmentVM)
         {
-            if(id!= departmentVM.Id)
+            if (id != departmentVM.Id)
                 return BadRequest();
 
             if (!ModelState.IsValid)
-                 return View(departmentVM);
+                return View(departmentVM);
 
             try
             {
-                var mappedEmp = _mapper.Map<DepartmentViewModel, Department>(departmentVM);
+                // Map DepartmentViewModel to Department entity
+                var department = _mapper.Map<DepartmentViewModel, Department>(departmentVM);
 
-                _unitOfWork.DepartmentRepository.Update(mappedEmp);
+                // Update department in the repository
+                _unitOfWork.Repository<Department>().Update(department);
                 _unitOfWork.Complete();
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                // 1. Log Exception
-                // 2. Friendly Message
-
-                if(_env.IsDevelopment())
+                // Log exception and return friendly message
+                if (_env.IsDevelopment())
                     ModelState.AddModelError(string.Empty, ex.Message);
                 else
-                    ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Department");
+                    ModelState.AddModelError(string.Empty, "An error occurred during updating the department");
 
                 return View(departmentVM);
             }
-
         }
 
-
-        // /Department/Delete/10
-        // /Department/Delete
         [HttpGet]
         public IActionResult Delete(int? id)
         {
@@ -157,21 +131,22 @@ namespace Route.G02.PL.Controllers
         {
             try
             {
-                var mappedEmp = _mapper.Map<DepartmentViewModel, Department>(departmentVM);
+                // Map DepartmentViewModel to Department entity
+                var department = _mapper.Map<DepartmentViewModel, Department>(departmentVM);
 
-                _unitOfWork.DepartmentRepository.Delete(mappedEmp);
+                // Delete department from the repository
+                _unitOfWork.Repository<Department>().Delete(department);
                 _unitOfWork.Complete();
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                // 1. Log exception
-                // 2. Friendly Message
-
+                // Log exception and return friendly message
                 if (_env.IsDevelopment())
                     ModelState.AddModelError(string.Empty, ex.Message);
                 else
-                    ModelState.AddModelError(string.Empty, "An Error Has Occured during Updating the Department");
+                    ModelState.AddModelError(string.Empty, "An error occurred during deleting the department");
 
                 return View(departmentVM);
             }

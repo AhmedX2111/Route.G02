@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
+using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Models;
 using Route.G02.PL.ViewModels;
 using System;
@@ -49,10 +50,12 @@ namespace Route.G02.PL.Controllers
 
             var employees = Enumerable.Empty<Employee>();
 
+            var employeeRepo = _unitOfWork.Repository<Employee>() as EmployeeRepository;
+
             if (string.IsNullOrEmpty(searchInp))
-                 employees = _unitOfWork.EmployeeRepository.GetAll();
+                 employees = employeeRepo.GetAll();
             else
-               employees = _unitOfWork.EmployeeRepository.SearchByName(searchInp.ToLower());
+               employees = employeeRepo.SearchByName(searchInp.ToLower());
 
             var mappedEmps = _mapper.Map<IEnumerable<Employee>, IEnumerable<EmployeeViewModel>>(employees);
 
@@ -95,21 +98,21 @@ namespace Route.G02.PL.Controllers
 
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
-                 _unitOfWork.EmployeeRepository.Add(mappedEmp);
+                 _unitOfWork.Repository<Employee>().Add(mappedEmp);
 
                 /// 3. TempData is a Dictionary Type Property (introduce in Asp.Net Framework 3.5)
                 ///         => is used to pass data between two consecutive requests
 
                 // 2. Update Department
-                // _UnitOfWork.DepartmentRepository.Update(department);
+                // _UnitOfWork.Repository<Department>().Update(department);
 
 
                 // 3. Delete project
-                // _UnitOfWork.projectRepository.Remove(project);
+                // _UnitOfWork.Repository<project>().Remove(project);
 
 
                 //_dbContext.Savechanges();
-               var count = _unitOfWork.Complete();
+                var count = _unitOfWork.Complete();
 
                 if (count > 0)
                     TempData["Message"] = "Department is Created Successfully";
@@ -129,7 +132,7 @@ namespace Route.G02.PL.Controllers
             if (!id.HasValue)
                 return BadRequest();  //  400
 
-            var employee = _unitOfWork.EmployeeRepository.Get(id.Value);
+            var employee = _unitOfWork.Repository<Employee>().Get(id.Value);
 
             var mappedEmp = _mapper.Map<Employee, EmployeeViewModel>(employee);
 
@@ -170,7 +173,7 @@ namespace Route.G02.PL.Controllers
             {
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
-                _unitOfWork.EmployeeRepository.Update(mappedEmp);
+                _unitOfWork.Repository<Employee>().Update(mappedEmp);
                 _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
@@ -205,7 +208,7 @@ namespace Route.G02.PL.Controllers
             {
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
-                _unitOfWork.EmployeeRepository.Delete(mappedEmp);
+                _unitOfWork.Repository<Employee>().Delete(mappedEmp);
                 _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Route.G02.DAL.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,7 @@ namespace Route.G02.BLL.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        public IEmployeeRepository EmployeeRepository { get; set; }
-
-        public IDepartmentRepository DepartmentRepository { get; set; }
-
-
+        IGenericRepository<T> Repository<T>() where T : ModelBase;
 
         int Complete();
     }
