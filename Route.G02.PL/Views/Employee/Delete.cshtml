@@ -9,6 +9,8 @@
 
 <form asp-action="Delete">
 
+    <input type="hidden" asp-for="ImageName" />
+
     <div asp-validation-summary="ModelOnly"></div>
 
     <partial name="ParialViews/DetailsDeleteEmployeeParial" />
