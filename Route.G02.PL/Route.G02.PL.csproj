@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Route.G02.BLL\Route.G02.BLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\files\images\" />
+  </ItemGroup>
+
 </Project>
