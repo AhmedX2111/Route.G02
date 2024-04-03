@@ -49,14 +49,14 @@ namespace Route.G02.BLL
         }
 
 
-        public int Complete()
+        public async Task<int> Complete()
         {
-           return _dbContext.SaveChanges();
+            return await _dbContext.SaveChangesAsync();
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            _dbContext.Dispose(); // close connection
+            await _dbContext.DisposeAsync(); // close connection
         }
 
     }

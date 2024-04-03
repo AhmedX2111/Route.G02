@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Route.G02.BLL.Interfaces;
 using Route.G02.DAL.Models;
 using Route.G02.PL.ViewModels;
+using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
@@ -28,7 +29,7 @@ namespace Route.G02.PL.Controllers
         public IActionResult Index(string searchInput)
         {
             // Retrieve departments from the repository
-            var departments = _unitOfWork.Repository<Department>().GetAll();
+            var departments = _unitOfWork.Repository<Department>().GetAllAsync();
 
             // Map departments to DepartmentViewModels
             var departmentViewModels = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentViewModel>>(departments);
@@ -44,7 +45,7 @@ namespace Route.G02.PL.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(DepartmentViewModel departmentVM)
+        public async Task<IActionResult> Create(DepartmentViewModel departmentVM)
         {
             if (ModelState.IsValid)
             {
@@ -53,7 +54,7 @@ namespace Route.G02.PL.Controllers
 
                 // Add department to the repository
                 _unitOfWork.Repository<Department>().Add(department);
-                _unitOfWork.Complete();
+                await _unitOfWork.Complete();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -61,13 +62,13 @@ namespace Route.G02.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int? id, string viewName = "Details")
+        public async Task<IActionResult> Details(int? id, string viewName = "Details")
         {
             if (!id.HasValue)
                 return BadRequest();
 
             // Retrieve department from the repository
-            var department = _unitOfWork.Repository<Department>().Get(id.Value);
+            var department = await _unitOfWork.Repository<Department>().GetAsync(id.Value);
 
             if (department == null)
                 return NotFound();
@@ -79,17 +80,17 @@ namespace Route.G02.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (!id.HasValue)
                 return BadRequest();
 
-            return Details(id, "Edit");
+            return await Details(id, "Edit");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, DepartmentViewModel departmentVM)
+        public async Task<IActionResult> Edit([FromRoute] int id, DepartmentViewModel departmentVM)
         {
             if (id != departmentVM.Id)
                 return BadRequest();
@@ -104,7 +105,7 @@ namespace Route.G02.PL.Controllers
 
                 // Update department in the repository
                 _unitOfWork.Repository<Department>().Update(department);
-                _unitOfWork.Complete();
+                await _unitOfWork.Complete();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -121,13 +122,13 @@ namespace Route.G02.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            return Details(id, "Delete");
+            return await Details(id, "Delete");
         }
 
         [HttpPost]
-        public IActionResult Delete(DepartmentViewModel departmentVM)
+        public async Task<IActionResult> Delete(DepartmentViewModel departmentVM)
         {
             try
             {
@@ -136,7 +137,7 @@ namespace Route.G02.PL.Controllers
 
                 // Delete department from the repository
                 _unitOfWork.Repository<Department>().Delete(department);
-                _unitOfWork.Complete();
+                await _unitOfWork.Complete();
 
                 return RedirectToAction(nameof(Index));
             }
