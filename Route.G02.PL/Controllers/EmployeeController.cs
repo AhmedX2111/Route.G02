@@ -82,7 +82,7 @@ namespace Route.G02.PL.Controllers
         {
             if (ModelState.IsValid) // Server Side Vl=alidation
             {
-                employeeVM.ImageName = DocumentSettings.UploadFile(employeeVM.Image, "images");
+                employeeVM.ImageName =await DocumentSettings.UploadFile(employeeVM.Image, "images");
                 // Manual Mapping
                 ///var mappedEmp = new Employee()
                 ///{
