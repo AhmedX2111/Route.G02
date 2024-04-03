@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
 using Route.G02.BLL.Repositories;
 using Route.G02.DAL.Models;
+using Route.G02.PL.Helpers;
 using Route.G02.PL.ViewModels;
 using System;
 using System.Collections;
@@ -80,6 +81,7 @@ namespace Route.G02.PL.Controllers
         {
             if (ModelState.IsValid) // Server Side Vl=alidation
             {
+                employeeVM.ImageName = DocumentSettings.UploadFile(employeeVM.Image, "images");
                 // Manual Mapping
                 ///var mappedEmp = new Employee()
                 ///{
