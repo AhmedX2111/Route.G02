@@ -1,6 +1,7 @@
 ﻿using Route.G02.DAL.Models;
 using System.ComponentModel.DataAnnotations;
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace Route.G02.PL.ViewModels
 {
@@ -54,10 +55,12 @@ namespace Route.G02.PL.ViewModels
         //[ForeignKey("Department")]
         public int? DepartmentId { get; set; } // Foregin key column
 
-
-
         //[InverseProperty(nameof(Models.Department.Employees))]
         // Navigational property = [one]
         public Department Department { get; set; }
+
+        public IFormFile Image { get; set; }
+
+        public string ImageName { get; set; }
     }
 }

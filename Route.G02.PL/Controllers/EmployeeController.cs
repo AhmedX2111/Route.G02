@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Route.G02.BLL.Interfaces;
 using Route.G02.BLL.Repositories;
+using System.Threading.Tasks;
 using Route.G02.DAL.Models;
+using Route.G02.PL.Helpers;
 using Route.G02.PL.ViewModels;
 using System;
 using System.Collections;
@@ -53,7 +55,7 @@ namespace Route.G02.PL.Controllers
             var employeeRepo = _unitOfWork.Repository<Employee>() as EmployeeRepository;
 
             if (string.IsNullOrEmpty(searchInp))
-                 employees = employeeRepo.GetAll();
+                 employees = employeeRepo.GetAllAsync();
             else
                employees = employeeRepo.SearchByName(searchInp.ToLower());
 
@@ -76,10 +78,11 @@ namespace Route.G02.PL.Controllers
 
         [HttpPost]
 
-        public IActionResult Create(EmployeeViewModel employeeVM)
+        public async Task<IActionResult> Create(EmployeeViewModel employeeVM)
         {
             if (ModelState.IsValid) // Server Side Vl=alidation
             {
+                employeeVM.ImageName =await DocumentSettings.UploadFile(employeeVM.Image, "images");
                 // Manual Mapping
                 ///var mappedEmp = new Employee()
                 ///{
@@ -95,10 +98,10 @@ namespace Route.G02.PL.Controllers
 
                 //Employee mappedEmp = (Employee) employeeVM;
 
-
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
+                  
+                _unitOfWork.Repository<Employee>().Add(mappedEmp);
 
-                 _unitOfWork.Repository<Employee>().Add(mappedEmp);
 
                 /// 3. TempData is a Dictionary Type Property (introduce in Asp.Net Framework 3.5)
                 ///         => is used to pass data between two consecutive requests
@@ -112,7 +115,7 @@ namespace Route.G02.PL.Controllers
 
 
                 //_dbContext.Savechanges();
-                var count = _unitOfWork.Complete();
+                var count = await _unitOfWork.Complete();
 
                 if (count > 0)
                     TempData["Message"] = "Department is Created Successfully";
@@ -127,17 +130,22 @@ namespace Route.G02.PL.Controllers
         // /Employee/Deatils/
         [HttpGet]
 
-        public IActionResult Details(int? id, string viewName = "Details")
+        public async Task<IActionResult> Details(int? id, string viewName = "Details")
         {
             if (!id.HasValue)
                 return BadRequest();  //  400
 
-            var employee = _unitOfWork.Repository<Employee>().Get(id.Value);
+            var employee = await _unitOfWork.Repository<Employee>().GetAsync(id.Value);
 
             var mappedEmp = _mapper.Map<Employee, EmployeeViewModel>(employee);
 
             if (employee is null)
                 return NotFound();  //  404
+
+            if (viewName.Equals(nameof(Delete), StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ImageName"] = employee.ImageName;
+            }
 
             return View(viewName, mappedEmp);
 
@@ -146,10 +154,10 @@ namespace Route.G02.PL.Controllers
         // /Employee/Edit/10
         // /Employee/Edit/
         //[HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             //ViewBag.Departments = _departmentRepo.GetAll();
-            return Details(id, "Edit");
+            return await Details(id, "Edit");
 
             ///if (!id.HasValue)
             ///    return BadRequest();  //  400
@@ -161,7 +169,7 @@ namespace Route.G02.PL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, EmployeeViewModel employeeVM)
+        public async Task<IActionResult> Edit([FromRoute] int id, EmployeeViewModel employeeVM)
         {
             if (id != employeeVM.Id)
                 return BadRequest();
@@ -174,7 +182,7 @@ namespace Route.G02.PL.Controllers
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
                 _unitOfWork.Repository<Employee>().Update(mappedEmp);
-                _unitOfWork.Complete();
+                await _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -196,21 +204,29 @@ namespace Route.G02.PL.Controllers
         // /Employee/Delete/10
         // /Employee/Delete
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            return Details(id, "Delete");
+            return await Details(id, "Delete");
         }
 
         [HttpPost]
-        public IActionResult Delete(EmployeeViewModel employeeVM)
+        public async Task<IActionResult> Delete(EmployeeViewModel employeeVM)
         {
             try
             {
+                employeeVM.ImageName = TempData["ImageName"] as string;
+
                 var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
 
                 _unitOfWork.Repository<Employee>().Delete(mappedEmp);
-                _unitOfWork.Complete();
-                return RedirectToAction(nameof(Index));
+                var count = await _unitOfWork.Complete();
+                if (count > 0)
+                {
+                    DocumentSettings.DeleteFile(employeeVM.ImageName, "images");
+                    return RedirectToAction(nameof(Index)); 
+
+                }
+                return View(employeeVM);
             }
             catch (Exception ex)
             {

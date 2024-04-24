@@ -26,7 +26,8 @@ namespace Route.G02.DAL.Models
     // Model
     public class Employee : ModelBase
     {
-     
+
+        #region Data
         public string Name { get; set; }
 
         public int? Age { get; set; }
@@ -49,7 +50,10 @@ namespace Route.G02.DAL.Models
 
         public Gender Gender { get; set; }
 
-        public EmpType EmployeeType { get; set; }
+        public EmpType EmployeeType { get; set; } 
+        #endregion
+
+        public string ImageName { get; set; }
 
         public int? DepartmentId { get; set; } // Foregin key column
 
