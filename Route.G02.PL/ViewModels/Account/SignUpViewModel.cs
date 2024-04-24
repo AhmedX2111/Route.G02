@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Route.G02.PL.ViewModels.User
+namespace Route.G02.PL.ViewModels.Account
 {
 	public class SignUpViewModel
 	{
