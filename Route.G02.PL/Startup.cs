@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Route.G02.PL.Services.EmailSender;
 
 namespace Route.G02.PL
 {
@@ -67,7 +68,7 @@ namespace Route.G02.PL
 				//options.User.AllowedUserNameCharacters = "asdfghk9876";
 				options.User.RequireUniqueEmail = true;
 
-			}).AddEntityFrameworkStores<ApplicationDbContext>();
+			}).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
 			services.ConfigureApplicationCookie(options =>
 			{
@@ -75,7 +76,7 @@ namespace Route.G02.PL
 				options.ExpireTimeSpan = TimeSpan.FromDays(1);
 				options.AccessDeniedPath = "/Home/Error";
 			});
-
+			services.AddTransient<IEmailSender, EmailSender>();
 			//services.AddAuthentication("Hamda");
 			services.AddAuthentication(options =>
 			{

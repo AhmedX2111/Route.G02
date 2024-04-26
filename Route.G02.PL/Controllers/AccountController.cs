@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Route.G02.DAL.Models;
+using Route.G02.PL.Services.EmailSender;
 using Route.G02.PL.ViewModels.Account;
 using System.Threading.Tasks;
 
@@ -8,11 +10,15 @@ namespace Route.G02.PL.Controllers
 {
     public class AccountController : Controller
     {
+		private readonly IEmailSender _emailSender;
+		private readonly IConfiguration _configuration;
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly SignInManager<ApplicationUser> _signInManager;
 
-		public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+		public AccountController(IEmailSender emailSender, IConfiguration configuration, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
 		{
+			_emailSender = emailSender;
+			_configuration = configuration;
 			_userManager = userManager;
 			_signInManager = signInManager;
 		}
@@ -109,16 +115,53 @@ namespace Route.G02.PL.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await userManager.FindByEmailAsync(model.Email);
-                if (user is not null)
+                var user = await _userManager.FindByEmailAsync(model.Email);
+				var resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+				if (user is not null)
                 {
-                    //send email
-                }
+					var passwordUrl = Url.Action("ResetPassword", "Account", new { email = user.Email, token = resetPasswordToken }, "localhost:5001");
+					//send email
+					await emailSender.SendAsync(
+						from: configuration["EmailSettings:SenderEmail"],
+						recipients: model.Email,
+						subject: "reset your password",
+						body: passwordUrl
+						);
+					return Redirect(nameof(CheckYourInbox));
+				}
                 ModelState.AddModelError(string.Empty, "There is not account with this email");
             }
             return View(model);
         }
-        #endregion
+		public IActionResult CheckYourInbox()
+		{
+			return View();
+		}
+		[HttpGet]
+		public IActionResult ResetPassword(string email, string token)
+		{
+			TempData["Email"] = email;
+			TempData["token"] = token;
+			return View();
+		}
+		[HttpPost]
+		public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+		{
+			if (ModelState.IsValid)
+			{
+				var email = TempData["Email"] as string;
+				var token = TempData["token"] as string;
+				var user = await _userManager.FindByNameAsync(email);
+				if (user is not null)
+				{
+					_userManager.ResetPasswordAsync(user, token, model.NewPassword);
+					return RedirectToAction(nameof(SignIn));
+				}
+				ModelState.AddModelError(string.Empty, "Url is not valid");
+			}
+			return View(model);
+		}
+		#endregion
 
 
 
@@ -130,5 +173,5 @@ namespace Route.G02.PL.Controllers
 
 
 
-    }
+	}
 }
