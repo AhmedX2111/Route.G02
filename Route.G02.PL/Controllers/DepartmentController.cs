@@ -9,9 +9,11 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Route.G02.PL.Controllers
 {
+    [Authorize]
     public class DepartmentController : Controller
     {
         private readonly IMapper _mapper;
