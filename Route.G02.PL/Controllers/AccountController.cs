@@ -72,35 +72,46 @@ namespace Route.G02.PL.Controllers
 		[HttpPost]
 		public async Task<IActionResult> SignIn(SignInViewModel model)
 		{
-			if (ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
-				var user = await _userManager.FindByEmailAsync(model.Email);
-				if (user is not null)
-				{
-					var flag = await _userManager.CheckPasswordAsync(user, model.Password);
-					if (flag)
-					{
-						var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
-						if (result.IsLockedOut)
-						{
-							ModelState.AddModelError(string.Empty, "Your account is locked");
-						}
-						if (result.Succeeded)
-						{
-							return RedirectToAction(nameof(HomeController.Index), "Home");
-						}
-						if (result.IsNotAllowed)
-						{
-							ModelState.AddModelError(string.Empty, "Your account is not confirmed yet"); ;
-						}
+				return View(model);
+			}
 
-					}
-				}
+			var user = await _userManager.FindByEmailAsync(model.Email);
+			if (user == null)
+			{
+				ModelState.AddModelError(string.Empty, "Invalid login");
+				return View(model);
+			}
+
+			var passwordIsValid = await _userManager.CheckPasswordAsync(user, model.Password);
+			if (!passwordIsValid)
+			{
+				ModelState.AddModelError(string.Empty, "Invalid login");
+				return View(model);
+			}
+
+			var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+			if (signInResult.Succeeded)
+			{
+				return RedirectToAction(nameof(HomeController.Index), "Home");
+			}
+			else if (signInResult.IsLockedOut)
+			{
+				ModelState.AddModelError(string.Empty, "Your account is locked");
+			}
+			else if (signInResult.IsNotAllowed)
+			{
+				ModelState.AddModelError(string.Empty, "Your account is not confirmed yet");
+			}
+			else
+			{
 				ModelState.AddModelError(string.Empty, "Invalid login");
 			}
-			return View(model);
 
+			return View(model);
 		}
+
 		public async new Task<IActionResult> SignOut()
 		{
 			await _signInManager.SignOutAsync();
@@ -121,8 +132,8 @@ namespace Route.G02.PL.Controllers
                 {
 					var passwordUrl = Url.Action("ResetPassword", "Account", new { email = user.Email, token = resetPasswordToken }, "localhost:5001");
 					//send email
-					await emailSender.SendAsync(
-						from: configuration["EmailSettings:SenderEmail"],
+					await _emailSender.SendAsync(
+						from: _configuration["EmailSettings:SenderEmail"],
 						recipients: model.Email,
 						subject: "reset your password",
 						body: passwordUrl
@@ -154,7 +165,7 @@ namespace Route.G02.PL.Controllers
 				var user = await _userManager.FindByNameAsync(email);
 				if (user is not null)
 				{
-					_userManager.ResetPasswordAsync(user, token, model.NewPassword);
+					await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
 					return RedirectToAction(nameof(SignIn));
 				}
 				ModelState.AddModelError(string.Empty, "Url is not valid");
